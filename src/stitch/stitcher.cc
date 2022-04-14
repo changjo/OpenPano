@@ -30,7 +30,7 @@ const static bool DEBUG_OUT = false;
 const static char* MATCHINFO_DUMP = "log/matchinfo.txt";
 const static char* HOMOINFO_DUMP = "homoinfo.txt";
 
-Mat32f Stitcher::build() {
+Mat32f Stitcher::build(const char* homoInfoDump) {
   calc_feature();
   // TODO choose a better starting point by MST use centrality
 
@@ -52,7 +52,7 @@ Mat32f Stitcher::build() {
     estimate_camera();
   else
     build_linear_simple();		// naive mode
-  dump_homoinfo(HOMOINFO_DUMP);
+  dump_homoinfo(homoInfoDump);
   pairwise_matches.clear();
   // TODO automatically determine projection method even in naive mode
   if (ESTIMATE_CAMERA)
@@ -66,7 +66,7 @@ Mat32f Stitcher::build() {
 }
 
 
-Mat32f Stitcher::build_manual() {
+Mat32f Stitcher::build_manual(const char* homoInfoDump) {
   no_calc_feature();
   // TODO choose a better starting point by MST use centrality
 
@@ -85,7 +85,7 @@ Mat32f Stitcher::build_manual() {
   }
   assign_center();
 
-  load_homoinfo(HOMOINFO_DUMP);
+  load_homoinfo(homoInfoDump);
 
   // pairwise_matches.clear();
   // TODO automatically determine projection method even in naive mode

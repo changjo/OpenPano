@@ -214,14 +214,14 @@ void work(int argc, char* argv[]) {
  *  }
  */
 	vector<string> imgs;
-	REPL(i, 1, argc) imgs.emplace_back(argv[i]);
+	REPL(i, 2, argc) imgs.emplace_back(argv[i]);
 	Mat32f res;
 	if (CYLINDER) {
 		CylinderStitcher p(move(imgs));
 		res = p.build();
 	} else {
 		Stitcher p(move(imgs));
-		res = p.build();
+		res = p.build(argv[1]);
 	}
 
 	if (CROP) {
@@ -247,14 +247,14 @@ void work_manual(int argc, char* argv[]) {
  *  }
  */
 	vector<string> imgs;
-	REPL(i, 3, argc) imgs.emplace_back(argv[i]);
+	REPL(i, 4, argc) imgs.emplace_back(argv[i]);
 	Mat32f res;
 	if (CYLINDER) {
 		CylinderStitcher p(move(imgs));
 		res = p.build();
 	} else {
 		Stitcher p(move(imgs));
-		res = p.build_manual();
+		res = p.build_manual(argv[2]);
 	}
 
 	if (CROP) {
@@ -266,7 +266,7 @@ void work_manual(int argc, char* argv[]) {
 #ifdef DEBUG
 		GuardedTimer tm("Writing image");
 #endif
-		write_rgb(argv[2], res);
+		write_rgb(argv[3], res);
 	}
 }
 

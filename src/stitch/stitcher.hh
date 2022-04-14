@@ -59,8 +59,8 @@ class Stitcher : public StitcherBase {
 					bundle.component[i].imgptr = &imgs[i];
 			}
 
-		virtual Mat32f build();
-		virtual Mat32f build_manual();
+		virtual Mat32f build(const char*);
+		virtual Mat32f build_manual(const char*);
 };
 
 }

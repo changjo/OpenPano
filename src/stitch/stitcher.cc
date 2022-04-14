@@ -28,6 +28,7 @@ namespace pano {
 // use in development
 const static bool DEBUG_OUT = false;
 const static char* MATCHINFO_DUMP = "log/matchinfo.txt";
+const static char* HOMOINFO_DUMP = "homoinfo.txt";
 
 Mat32f Stitcher::build() {
   calc_feature();
@@ -51,6 +52,7 @@ Mat32f Stitcher::build() {
     estimate_camera();
   else
     build_linear_simple();		// naive mode
+  dump_homoinfo(HOMOINFO_DUMP);
   pairwise_matches.clear();
   // TODO automatically determine projection method even in naive mode
   if (ESTIMATE_CAMERA)
@@ -62,6 +64,41 @@ Mat32f Stitcher::build() {
 
   return bundle.blend();
 }
+
+
+Mat32f Stitcher::build_manual() {
+  no_calc_feature();
+  // TODO choose a better starting point by MST use centrality
+
+  pairwise_matches.resize(imgs.size());
+  for (auto& k : pairwise_matches) k.resize(imgs.size());
+  // if (ORDERED_INPUT)
+  //   // linear_pairwise_match();
+  //   cout << "ORDERED_INPUT" << endl;
+  // else
+  //   // pairwise_match();
+  free_feature();
+  //load_matchinfo(MATCHINFO_DUMP);
+  if (DEBUG_OUT) {
+    draw_matchinfo();
+    dump_matchinfo(MATCHINFO_DUMP);
+  }
+  assign_center();
+
+  load_homoinfo(HOMOINFO_DUMP);
+
+  // pairwise_matches.clear();
+  // TODO automatically determine projection method even in naive mode
+  if (ESTIMATE_CAMERA)
+    bundle.proj_method = ConnectedImages::ProjectionMethod::spherical;
+  else
+    bundle.proj_method = ConnectedImages::ProjectionMethod::flat;
+  print_debug("Using projection method: %d\n", bundle.proj_method);
+  bundle.update_proj_range();
+
+  return bundle.blend();
+}
+
 
 bool Stitcher::match_image(
     const PairWiseMatcher& pwmatcher, int i, int j) {
@@ -147,9 +184,11 @@ void Stitcher::estimate_camera() {
 
   // produced homo operates on [-w/2,w/2] coordinate
   REP(i, imgs.size()) {
-    //cout << "Camera " << i << " " << cameras[i].R << ", " << cameras[i].K() << endl;
+    cout << "Camera " << i << " " << cameras[i].R << ", " << cameras[i].K() << endl;
     bundle.component[i].homo_inv = cameras[i].K() * cameras[i].R;
     bundle.component[i].homo = cameras[i].Rinv() * cameras[i].K().inverse();
+    cout << "Camera " << i << " homo " << bundle.component[i].homo << endl;
+    cout << "Camera " << i << " homo_inv " << bundle.component[i].homo_inv << endl;
   }
 }
 
@@ -192,6 +231,11 @@ void Stitcher::build_linear_simple() {
     comp[i].homo = M * comp[i].homo;
   }
   bundle.calc_inverse_homo();
+
+  for (int i=0; i<n; i++) {
+    cout << "Camera " << i << " homo     " << bundle.component[i].homo << endl;
+    cout << "Camera " << i << " homo_inv " << bundle.component[i].homo_inv << endl;
+  }
 }
 
 }	// namepsace pano

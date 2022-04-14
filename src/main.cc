@@ -23,6 +23,7 @@
 #include "common/common.hh"
 #include <ctime>
 #include <cassert>
+#include <glob.h>
 
 #ifdef DISABLE_JPEG
 #define IMGFILE(x) #x ".png"
@@ -234,6 +235,106 @@ void work(int argc, char* argv[]) {
 	}
 }
 
+
+void work_manual(int argc, char* argv[]) {
+/*
+ *  vector<Mat32f> imgs(argc - 1);
+ *  {
+ *    GuardedTimer tm("Read images");
+ *#pragma omp parallel for schedule(dynamic)
+ *    REPL(i, 1, argc)
+ *      imgs[i-1] = read_img(argv[i]);
+ *  }
+ */
+	vector<string> imgs;
+	REPL(i, 3, argc) imgs.emplace_back(argv[i]);
+	Mat32f res;
+	if (CYLINDER) {
+		CylinderStitcher p(move(imgs));
+		res = p.build();
+	} else {
+		Stitcher p(move(imgs));
+		res = p.build_manual();
+	}
+
+	if (CROP) {
+		int oldw = res.width(), oldh = res.height();
+		res = crop(res);
+		print_debug("Crop from %dx%d to %dx%d\n", oldw, oldh, res.width(), res.height());
+	}
+	{
+#ifdef DEBUG
+		GuardedTimer tm("Writing image");
+#endif
+		write_rgb(argv[2], res);
+	}
+}
+
+
+// void work_all(int argc, char* argv[]) {
+// /*
+//  *  vector<Mat32f> imgs(argc - 1);
+//  *  {
+//  *    GuardedTimer tm("Read images");
+//  *#pragma omp parallel for schedule(dynamic)
+//  *    REPL(i, 1, argc)
+//  *      imgs[i-1] = read_img(argv[i]);
+//  *  }
+//  */
+// 	cout << "argc " << argc << endl;
+	
+// 	REPL(i, 2, argc) cout << "argv[" << i << "] " << argv[i] << endl;;
+	
+// 	glob_t globbuf_1, globbuf_2, globbuf_3;
+
+//     int err_1 = glob("/mnt/hdd_8tb_1/datasets/FOOTBALL/AXIS/20220408_0.4_2/images/20220408_112037_F150_B8A44F41F051_0.4_2_undist_3_crop/*.jpg", 0, NULL, &globbuf_1);
+// 	int err_2 = glob("/mnt/hdd_8tb_1/datasets/FOOTBALL/AXIS/20220408_0.4_2/images/20220408_112037_CBAD_B8A44F41F049_0.4_2_undist_3_crop/*.jpg", 0, NULL, &globbuf_2);
+// 	int err_3 = glob("/mnt/hdd_8tb_1/datasets/FOOTBALL/AXIS/20220408_0.4_2/images/20220408_112037_FFC6_B8A44F41F0D1_0.4_2_undist_3_crop/*.jpg", 0, NULL, &globbuf_3);
+
+//     // if(err_1 == 0)
+//     // {
+//     //     for (size_t i = 0; i < globbuf_1.gl_pathc; i++)
+//     //     {
+//     //         printf("%s\n", globbuf_1.gl_pathv[i]);
+//     //     }
+
+//     //     globfree(&globbuf_1);
+//     // }
+	
+// 	for (size_t k = 0; k < globbuf_1.gl_pathc; k++) {
+// 		argv[0] = globbuf_1.gl_pathv[k];
+// 		argv[1] = globbuf_2.gl_pathv[k];
+// 		argv[2] = globbuf_3.gl_pathv[k];
+
+// 		vector<string> imgs;
+// 		REPL(i, 2, argc) imgs.emplace_back(argv[i]);
+
+// 		Mat32f res;
+// 		if (CYLINDER) {
+// 			CylinderStitcher p(move(imgs));
+// 			res = p.build();
+// 		} else {
+// 			Stitcher p(move(imgs));
+// 			res = p.build_manual();
+// 		}
+
+// 		if (CROP) {
+// 			int oldw = res.width(), oldh = res.height();
+// 			res = crop(res);
+// 			print_debug("Crop from %dx%d to %dx%d\n", oldw, oldh, res.width(), res.height());
+// 		}
+// 		{
+// 			GuardedTimer tm("Writing image");
+// 			write_rgb(IMGFILE(out), res);
+// 		}
+// 	}
+
+// 	globfree(&globbuf_1);
+// 	globfree(&globbuf_2);
+// 	globfree(&globbuf_3);
+// }
+
+
 void init_config() {
 #define CFG(x) \
 	x = Config.get(#x)
@@ -351,6 +452,8 @@ int main(int argc, char* argv[]) {
 		test_warp(argc, argv);
 	else if (command == "planet")
 		planet(argv[2]);
+	else if (command == "manual")
+		work_manual(argc, argv);
 	else
 		// the real routine
 		work(argc, argv);

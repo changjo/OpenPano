@@ -30,6 +30,7 @@ void __m_assert_check__(bool val, const char *expr, const char *file, const char
 
 
 void __print_debug__(const char *file, const char *func, int line, const char *fmt, ...) {
+#ifdef DEBUG
 	static map<int, string> colormap;
 	if (! colormap[line].length()) {
 		int color = std::hash<int>()(line) % 5;
@@ -51,6 +52,7 @@ void __print_debug__(const char *file, const char *func, int line, const char *f
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
+#endif
 }
 
 

@@ -26,6 +26,20 @@ void StitcherBase::calc_feature() {
   }
 }
 
+
+void StitcherBase::no_calc_feature() {
+#ifdef DEBUG
+  GuardedTimer tm("calc_feature()");
+#endif
+#pragma omp parallel for schedule(dynamic)
+  REP(k, (int)imgs.size()) {
+    imgs[k].load();
+    if (config::LAZY_READ)
+      imgs[k].release();
+  }
+}
+
+
 void StitcherBase::free_feature() {
   feats.clear(); feats.shrink_to_fit();  // free memory for feature
   keypoints.clear(); keypoints.shrink_to_fit();  // free memory for feature

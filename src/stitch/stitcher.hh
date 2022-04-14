@@ -47,6 +47,9 @@ class Stitcher : public StitcherBase {
 		void draw_matchinfo();
 		void dump_matchinfo(const char*) const;
 		void load_matchinfo(const char*);
+
+		void dump_homoinfo(const char*) const;
+		void load_homoinfo(const char*);
 	public:
 		template<typename U, typename X =
 			disable_if_same_or_derived<Stitcher, U>>
@@ -57,6 +60,7 @@ class Stitcher : public StitcherBase {
 			}
 
 		virtual Mat32f build();
+		virtual Mat32f build_manual();
 };
 
 }

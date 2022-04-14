@@ -35,6 +35,7 @@ class StitcherBase {
 
 		// get feature descriptor and keypoints for each image
 		void calc_feature();
+		void no_calc_feature();
 
 		void free_feature();
 

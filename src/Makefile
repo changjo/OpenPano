@@ -24,7 +24,7 @@ endif
 OPTFLAGS ?= -O3 -msse3 -march=native
 #OPTFLAGS ?= -g3 -fsanitize=address,undefined -O2 -lasan
 #OPTFLAGS ?= -g3 -fsanitize=leak -O2 -lubsan
-DEFINES = -DDEBUG  	# comment out this line improves speed
+# DEFINES = -DDEBUG  	# comment out this line improves speed
 
 # optional extra packages
 #LIBS = opencv

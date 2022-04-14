@@ -139,4 +139,39 @@ void Stitcher::load_matchinfo(const char* fname) {
 	fin.close();
 }
 
+void Stitcher::dump_homoinfo(const char* fname) const {
+	print_debug("Dump homoinfo to %s\n", fname);
+	ofstream fout(fname);
+	int n = imgs.size();
+	REP(i, n) {
+		fout << i << endl;
+		bundle.component[i].homo.serialize(fout);
+		fout << endl;
+	}
+	REP(i, n) {
+		fout << i << endl;
+		bundle.component[i].homo_inv.serialize(fout);
+		fout << endl;
+	}
+	fout.close();
+}
+
+void Stitcher::load_homoinfo(const char* fname) {
+	print_debug("Load matchinfo from %s\n", fname);
+	ifstream fin(fname);
+	int i;
+	int k = 0;
+	int n = imgs.size();
+	while (true) {
+		fin >> i;
+		if (fin.eof()) break;
+		if (k < n)
+			bundle.component[i].homo = Homography::deserialize(fin);
+		else
+			bundle.component[i].homo_inv = Homography::deserialize(fin);
+		k++;
+	}
+	fin.close();
+}
+
 }
